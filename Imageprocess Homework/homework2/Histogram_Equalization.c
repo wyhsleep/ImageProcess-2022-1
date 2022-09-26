@@ -12,7 +12,7 @@ unsigned char 	*pBmpBuf;
 char *readBmp(char *filepath)
 {
     FILE *fp = fopen(filepath,"rb");
-    if(fp == NULL)                      //判断文件是否打开成功
+    if(fp == NULL)                    //判断文件是否打开成功
     {
         printf("Failed to open the file\n");
         return -1;
@@ -29,7 +29,6 @@ char *readBmp(char *filepath)
 	{   pColorTable = (RGBQUAD *)malloc(4 * 1024);
 		fread(pColorTable, 4, 256, fp);
 	}
-
     pBmpBuf = (unsigned char *)malloc(sizeof(unsigned char) * lineByte * height); //分配内存存储图片像素数据
 	fread(pBmpBuf, 1, lineByte * height, fp);
     fclose(fp);
@@ -56,9 +55,6 @@ int saveBmp(char *bmpName, unsigned char *imgBuf)
 	fwrite(&fileHead, 14, 1, fp);
  
 	BITMAPINFOHEADER infoHead = infoHeader;           //将打开的bmpinfoheader数据复制给新的bmp并修改图片大小
-    int lineByte = (1.5*width * bitcount / 8 + 3) / 4 * 4;
-    infoHead.biWidth = 1.5 * width;
-    infoHead.biHeight = 1.5 * height;
     infoHead.biSizeImage = lineByte*infoHead.biHeight;
 	fwrite(&infoHead, 40, 1, fp);
  
@@ -67,7 +63,7 @@ int saveBmp(char *bmpName, unsigned char *imgBuf)
 		fwrite(pColorTable,sizeof(RGBQUAD),256,fp);
 	}
 	
-	fwrite(imgBuf, 1.5*height * lineByte, 1, fp);   //存储新图片像素数据
+	fwrite(imgBuf, height * lineByte, 1, fp);   //存储新图片像素数据
 	fclose(fp);
 	printf("Successfully save the file");
 	return 0;
@@ -75,34 +71,60 @@ int saveBmp(char *bmpName, unsigned char *imgBuf)
 
 int main()
 {
-    char readpath[] = "data2.bmp";
-    char writepath[] = "outdata2.bmp";
+    char readpath[] = "0501bw.bmp";
+    char writepath[] = "out0501bw.bmp";
     readBmp(readpath);
     unsigned char *outpBmpBuf = (unsigned char *)malloc(sizeof(unsigned char) * lineByte *height);
+	int L = pow(2,bitcount);
     int size = height * width;
-	double *Pr_k = (double *)malloc(256);
-	double *Tr_k = (double *)malloc(256);
-	for (int k = 0; k < 256; k++)
+	double Pr_k[256] = {0};
+	double Tr_k[256] = {0};
+	for (int k = 0; k < L; k++)
 	{
-		*(Pr_k + k) = 0;
 		for (int i = 0; i < height; i++)
 		{
 			for (int j = 0; j < width;j++)
 			{
 				if (*(pBmpBuf+i*lineByte+j) == k)
-					*(Pr_k + k) = *(Pr_k + k) + 1;
+				{
+					Pr_k[k] = Pr_k[k]+ 1;
+				}
 			}
 		}
-		*(Pr_k + k) = (*(Pr_k + k))/ size;
+		Pr_k[k] = Pr_k[k]/ size;
 	}
 
-	for (int k = 0; k < 256;k++)
+	for (int k = 0; k < L; k++)
 	{
-		*(Tr_k + k) = 0;
-		for (int i = 0; i < k; i++)
+		for (int i = 0; i < k+1; i++)
 		{
-			*(Tr_k + k) = *(Tr_k + k) + 255*(*(Pr_k + i));
+			Tr_k[k] = Tr_k[k]+(L-1)*Pr_k[i];
 		}
-		printf("%f\n", *(Tr_k + k));
+		Tr_k[k] = ceil(Tr_k[k]);
 	}
+
+	for (int k = 0; k < L; k++)
+	{
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width;j++)
+			{
+				if (*(pBmpBuf+i*lineByte+j) == k)
+				{
+					*(outpBmpBuf+i*lineByte+j) = (int)(Tr_k[k]);
+				}
+			}
+		}
+		Pr_k[k] = Pr_k[k]/ size;
+	}
+
+	saveBmp(writepath, outpBmpBuf);
+
+	free(pBmpBuf);
+    free(outpBmpBuf);
+	if (bitcount == 8)
+	{
+		free(pColorTable);
+	}
+	return 0;
 }
