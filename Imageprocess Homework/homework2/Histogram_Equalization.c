@@ -71,14 +71,16 @@ int saveBmp(char *bmpName, unsigned char *imgBuf)
 
 int main()
 {
-    char readpath[] = "0501bw.bmp";
-    char writepath[] = "out0501bw.bmp";
+    char readpath[] = "data2.bmp";
+    char writepath[] = "outdata2.bmp";
     readBmp(readpath);
     unsigned char *outpBmpBuf = (unsigned char *)malloc(sizeof(unsigned char) * lineByte *height);
 	int L = pow(2,bitcount);
     int size = height * width;
 	double Pr_k[256] = {0};
 	double Tr_k[256] = {0};
+	//计算像素的分布
+
 	for (int k = 0; k < L; k++)
 	{
 		for (int i = 0; i < height; i++)
@@ -93,16 +95,16 @@ int main()
 		}
 		Pr_k[k] = Pr_k[k]/ size;
 	}
-
+	//均衡化
 	for (int k = 0; k < L; k++)
 	{
 		for (int i = 0; i < k+1; i++)
 		{
 			Tr_k[k] = Tr_k[k]+(L-1)*Pr_k[i];
 		}
-		Tr_k[k] = ceil(Tr_k[k]);
+		Tr_k[k] = floor(Tr_k[k]);
 	}
-
+	//分配新像素
 	for (int k = 0; k < L; k++)
 	{
 		for (int i = 0; i < height; i++)
