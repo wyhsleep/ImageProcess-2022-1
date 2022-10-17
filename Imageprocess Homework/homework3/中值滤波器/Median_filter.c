@@ -83,15 +83,17 @@ void Median(unsigned char* pBmpBuf,unsigned char* tmp)
     for(int i = 0;i < height;i++)
    	{
 		for(int j = 0;j < width;j++)
-		{	 
+		{	
                 int temp1[size];
                 int k = 0;
-                for(int m = i; m<i+sqrt(size);m++)
+                for(int m = i-floor(sqrt(size)/2); m<i+ceil(sqrt(size)/2);m++)
                 {
-                    for(int n = j; n<j+sqrt(size);n++)
+                    for(int n = j-floor(sqrt(size)/2); n<j+ceil(sqrt(size)/2);n++)
                     {   
-                        
-                        temp1[k] = *(pBmpBuf+m*lineByte+n);
+                        if(m < 0 || n < 0)
+                            temp1[k] = 0;
+                        else
+                            temp1[k] = *(pBmpBuf+m*lineByte+n);
                         k++;
                     }
                 }
@@ -116,36 +118,13 @@ int main()
     char readpath[] = "girl256-pepper&salt.bmp";
     char writepath[] = "outgirl256-pepper&salt.bmp";
     readBmp(readpath);
-    int tmplineByte = ((width+(int)(sqrt(size))) * bitcount / 8 + 3) / 4 * 4;
-    unsigned char *tmp = (unsigned char *)malloc(sizeof(unsigned char) * tmplineByte *((height+(int)(sqrt(size)))));
+    unsigned char *tmp = (unsigned char *)malloc(sizeof(unsigned char) * lineByte *height);
     unsigned char *outpBmpBuf = (unsigned char *)malloc(sizeof(unsigned char) * lineByte *height);
-
-    //边缘填充
-    for(int i=0;i<(width+(int)(sqrt(size)));i++)
-    {
-        for(int j=0;j<(width+(int)(sqrt(size)));j++)
-        {   
-            if(((int)floor(sqrt(size)/2) < i&&(int)floor(sqrt(size)/2)) < j&&i < width+((int)floor(sqrt(size)/2)&&j < height+(int)floor(sqrt(size)/2)))
-            {
-                *(tmp+i*tmplineByte+j) = *(pBmpBuf+(i-(int)floor(sqrt(size)/2))*tmplineByte+j-(int)floor(sqrt(size)/2));
-            }
-        }
-    }
-
-    for(int i =(int)(floor(sqrt(size)/2));i<width+(int)(floor(sqrt(size)/2));i++)
-    {
-        for(int j=(int)(floor(sqrt(size)/2));j<height+(int)(floor(sqrt(size)/2));j++)
-        {   
-            *(tmp+i*tmplineByte+j) = *(pBmpBuf+(i-(int)(floor(sqrt(size)/2)))*tmplineByte+(j-(int)(floor(sqrt(size)/2))));
-        }
-    }
-
-    
     int iteration_num = 3;
     for (int i = 0;i<iteration_num;i++)
     {
-        Median(tmp,outpBmpBuf);
-        depulicate(outpBmpBuf,tmp);
+        Median(pBmpBuf,outpBmpBuf);
+        depulicate(outpBmpBuf,pBmpBuf);
     }
 
 
