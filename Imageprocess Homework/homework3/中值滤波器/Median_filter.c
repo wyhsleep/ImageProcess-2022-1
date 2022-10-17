@@ -115,8 +115,8 @@ void depulicate(unsigned char* pBmpBuf,unsigned char* tmp)
 }
 int main()
 {
-    char readpath[] = "girl256-pepper&salt.bmp";
-    char writepath[] = "outgirl256-pepper&salt.bmp";
+    char readpath[] = "lena256-pepper&salt.bmp";
+    char writepath[] = "outlena256-pepper&salt.bmp";
     readBmp(readpath);
     unsigned char *tmp = (unsigned char *)malloc(sizeof(unsigned char) * lineByte *height);
     unsigned char *outpBmpBuf = (unsigned char *)malloc(sizeof(unsigned char) * lineByte *height);
