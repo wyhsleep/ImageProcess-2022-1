@@ -83,40 +83,40 @@ void Median(unsigned char* pBmpBuf,unsigned char* tmp,int S_max)
    	{
 		for(int j = 0;j < width;j++)
 		{	    
-                int size = 9;
-                int median;
+            int size = 9;
+            int median;
+            int temp1[size];
+            while (size<S_max||size == S_max)
+            {
+                int k = 0;
+                int z_xy = *(pBmpBuf+i*lineByte+j);
+                median = ceil(size/2);
                 int temp1[size];
-                while (size<S_max||size == S_max)
+                for(int m = i-floor(sqrt(size)/2); m<i+ceil(sqrt(size)/2);m++)
                 {
-                    int k = 0;
-                    int z_xy = *(pBmpBuf+i*lineByte+j);
-                    median = ceil(size/2);
-                    int temp1[size];
-                    for(int m = i-floor(sqrt(size)/2); m<i+ceil(sqrt(size)/2);m++)
-                    {
-                        for(int n = j-floor(sqrt(size)/2); n<j+ceil(sqrt(size)/2);n++)
-                        {   
-                            if(m < 0 || n < 0)
-                                temp1[k] = 0;
-                            else
-                                temp1[k] = *(pBmpBuf+m*lineByte+n);
-                            k++;
-                        }
-                    }
-                    qsort(temp1,size,sizeof(int),i_cmp);
-                    if(temp1[0] < temp1[median] && temp1[median] < temp1[size-1])
-                    {
-                        if(temp1[0] < z_xy && z_xy < temp1[size-1])
-                            *(tmp+i*lineByte+j) = z_xy;
+                    for(int n = j-floor(sqrt(size)/2); n<j+ceil(sqrt(size)/2);n++)
+                    {   
+                        if(m < 0 || n < 0)
+                            temp1[k] = 0;
                         else
-                            *(tmp+i*lineByte+j) = temp1[median];
-                        break;
+                            temp1[k] = *(pBmpBuf+m*lineByte+n);
+                        k++;
                     }
-                    else
-                        size = pow(sqrt(size)+2,2);
                 }
-                if(size > S_max)
-                    *(tmp+i*lineByte+j) = temp1[median];
+                qsort(temp1,size,sizeof(int),i_cmp);
+               if(temp1[0] < temp1[median] && temp1[median] < temp1[size-1])
+                {
+                   if(temp1[0] < z_xy && z_xy < temp1[size-1])
+                        *(tmp+i*lineByte+j) = z_xy;
+                    else
+                        *(tmp+i*lineByte+j) = temp1[median];
+                    break;
+                }
+                else
+                    size = pow(sqrt(size)+2,2);
+            }
+            if(size > S_max)
+                *(tmp+i*lineByte+j) = temp1[median];
 
 		}
 	}
