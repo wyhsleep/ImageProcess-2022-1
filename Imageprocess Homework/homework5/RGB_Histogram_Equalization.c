@@ -149,7 +149,7 @@ int main()
 	}
 
 	saveBmp(writepath, outpBmpBuf);
-
+	printf("%d",bitcount);
 	free(pBmpBuf);
     free(outpBmpBuf);
 	if (bitcount == 24)
